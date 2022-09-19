@@ -1,0 +1,10 @@
+<launch>
+    <group ns="A">
+        <param name="topic_name" value="message"/>
+        <node name="publisher" pkg="multi_thread_demo" type="publisher" output="screen"/>
+    </group>
+    <group ns="B">
+        <param name="topic_name" value="message"/>
+        <node name="publisher" pkg="multi_thread_demo" type="publisher" output="screen"/>
+    </group>
+</launch>
