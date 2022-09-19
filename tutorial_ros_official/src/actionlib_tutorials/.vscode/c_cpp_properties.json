@@ -1,0 +1,28 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/shan/Huazi/hardware_driver/devel/include/**",
+        "/home/shan/Huazi/test_ws/devel/include/**",
+        "/home/shan/NutCloud/NutSync/Code/08-ROS/ros-tutorial/catkin_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/shan/NutCloud/NutSync/Code/08-ROS/ros-tutorial/catkin_ws/src/actionlib_tutorials/include/**",
+        "/home/shan/Huazi/hardware_driver/src/air_pump_driver/include/**",
+        "/home/shan/NutCloud/NutSync/Code/08-ROS/ros-tutorial/catkin_ws/src/beginner_tutorials_py/include/**",
+        "/home/shan/Huazi/hardware_driver/src/crawler_chassis_driver/include/**",
+        "/home/shan/Huazi/hardware_driver/src/elite_arm/include/**",
+        "/home/shan/Huazi/test_ws/src/image_rec/include/**",
+        "/home/shan/Huazi/hardware_driver/src/screw_slide_driver/include/**",
+        "/home/shan/Huazi/hardware_driver/src/ultralsonic_driver/include/**",
+        "/home/shan/Huazi/test_ws/src/ultralsonic_test/src/ultralsonic_pub/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

@@ -1,0 +1,43 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/devel_isolated/tf/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/devel_isolated/tf2_msgs/include/**",
+        "/home/shan/Huazi/brick-quake/devel/include/**",
+        "/home/shan/NutCloud/NutSync/Code/08-ROS/ros-tutorial/catkin_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/shan/NutCloud/NutSync/Code/08-ROS/ros-tutorial/catkin_ws/src/actionlib_tutorials/include/**",
+        "/home/shan/Huazi/brick-quake/src/air_pump_driver/include/**",
+        "/home/shan/NutCloud/NutSync/Code/08-ROS/ros-tutorial/catkin_ws/src/beginner_tutorials_py/include/**",
+        "/home/shan/Huazi/brick-quake/src/brick_catch_pull/include/**",
+        "/home/shan/Huazi/brick-quake/src/crawler_chassis_driver/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/vision_opencv/cv_bridge/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/geometry/eigen_conversions/include/**",
+        "/home/shan/Huazi/brick-quake/src/elite_arm/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/vision_opencv/image_geometry/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/geometry/kdl_conversions/include/**",
+        "/home/shan/NutCloud/NutSync/Code/08-ROS/ros-tutorial/catkin_ws/src/learning_tf2/include/**",
+        "/home/shan/Huazi/brick-quake/src/screw_slide_driver/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/geometry/tf/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/geometry2/tf2/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/geometry2/tf2_bullet/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/geometry2/tf2_eigen/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/geometry2/tf2_geometry_msgs/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/geometry2/tf2_kdl/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/geometry2/tf2_msgs/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/geometry2/tf2_ros/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/geometry2/tf2_sensor_msgs/include/**",
+        "/home/shan/App/miniconda3/envs/ros/catkin_ws/src/geometry/tf_conversions/include/**",
+        "/home/shan/Huazi/brick-quake/src/ultralsonic_driver/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

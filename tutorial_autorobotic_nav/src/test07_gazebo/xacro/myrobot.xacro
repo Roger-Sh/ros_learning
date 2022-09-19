@@ -1,0 +1,10 @@
+<robot name="myrobot" xmlns:xacro="http://wiki.ros.org/xacro">
+    <xacro:include filename="header.xacro" />
+    <xacro:include filename="mybase.xacro" />
+    <xacro:include filename="mycam.xacro" />
+    <xacro:include filename="mylaser.xacro" />
+    <xacro:include filename="./gazebo_xacro/myrobot_gazebo_move.xacro" />
+    <xacro:include filename="./gazebo_xacro/myrobot_gazebo_laser.xacro" />
+    <xacro:include filename="./gazebo_xacro/myrobot_gazebo_cam.xacro" />
+    <xacro:include filename="./gazebo_xacro/myrobot_gazebo_kinect.xacro" />
+</robot>

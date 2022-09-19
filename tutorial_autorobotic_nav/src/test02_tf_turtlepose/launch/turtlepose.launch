@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- tf2:  -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="laser2_in_turtle1" args="1.5 2.5 0.0 0.0 0.0 0.0 turtle1 laser2"/> 
+
+    <!-- turtlesim -->
+    <node name="turtlesim" pkg="turtlesim" type="turtlesim_node" output="screen"/>
+
+    <!-- turtle_teleopt_key -->
+    <node name="turtle_teleopt_key" pkg="turtlesim" type="turtle_teleop_key" output="screen"/>
+
+    <!-- turtlepose_pub -->
+    <node name="turtlepose_pub" pkg="test02_tf_turtlepose" type="turtlepose_pub" output="screen"/>
+
+    <!-- turtlepose_sub -->
+    <node name="turtlepose_sub" pkg="test02_tf_turtlepose" type="turtlepose_sub" output="screen"/>
+
+    <!-- rviz -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find test02_tf_turtlepose)/rviz/turtlepose.rviz"/>
+</launch>

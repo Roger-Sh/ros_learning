@@ -1,0 +1,14 @@
+<launch>
+    <!-- gazebo 仿真 -->
+    <include file="$(find test07_gazebo)/launch/test07_demo03_gazebo_world.launch" />
+
+    <!-- 启动AMCL节点 -->
+    <arg name="rviz_name" default="myrobot_movebase.rviz" />
+    <include file="$(find test08_nav)/launch/test08_nav_demo04_amcl_rviz.launch" />
+
+    <!-- 运行move_base节点 -->
+    <include file="$(find test08_nav)/launch/test08_nav_demo05_movebase.launch" />
+
+
+
+</launch>

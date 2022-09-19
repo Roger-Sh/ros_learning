@@ -1,0 +1,20 @@
+<launch>
+
+    <!-- 将 Urdf 文件的内容加载到参数服务器 -->
+    <param name="robot_description" command="$(find xacro)/xacro $(find test07_gazebo)/xacro/myrobot.xacro" />
+
+    <!-- 启动 gazebo -->
+    <!-- <include file="$(find gazebo_ros)/launch/empty_world.launch" /> -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find test07_gazebo)/worlds/box_house.world" />
+    </include>
+
+    <!-- 在 gazebo 中显示机器人模型 -->
+    <node pkg="gazebo_ros" type="spawn_model" name="model" args="-urdf -model myrobot -param robot_description"  />
+
+
+    <!-- 添加点云坐标系到kinect 连杆坐标系的变换 -->
+    <node pkg="tf2_ros" name="static_transform_publiser" type="static_transform_publisher" args="0 0 0 -1.57 0 -1.57 /support /support_depth" />
+
+
+</launch>

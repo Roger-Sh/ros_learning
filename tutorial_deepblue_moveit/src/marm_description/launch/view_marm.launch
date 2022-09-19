@@ -1,0 +1,15 @@
+<launch>
+    <arg name="model" />
+
+    <!-- 加载机器人模型参数 robot_description -->
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find marm_description)/urdf/marm.xacro" />
+
+    <!-- joint_state_publisher_gui, 设置机器人关节运动参数的UI, 需要robot_description-->
+    <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+
+    <!-- robot_state_publisher, 发布机器人关节运动状态, 需要robot_description -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  
+    <!-- 运行rviz可视化界面 -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find marm_description)/rviz/urdf.rviz" required="true" />
+</launch>

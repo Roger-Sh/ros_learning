@@ -1,0 +1,5 @@
+<robot name="myrobot" xmlns:xacro="http://wiki.ros.org/xacro">
+    <xacro:include filename="myrobot_base.xacro" />
+    <xacro:include filename="myrobot_cam.xacro" />
+    <xacro:include filename="myrobot_lidar.xacro" />
+</robot>

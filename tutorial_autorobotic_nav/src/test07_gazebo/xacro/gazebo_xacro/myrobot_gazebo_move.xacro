@@ -1,0 +1,47 @@
+<robot name="myrobot_gazebo_move" xmlns:xacro="http://wiki.ros.org/xacro">
+    <!-- transmission wheel -->
+    <xacro:macro name="joint_trans" params="joint_name">
+        <!-- Transmission is important to link the joints and the controller -->
+        <transmission name="${joint_name}_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${joint_name}">
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${joint_name}_motor">
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+
+    <!-- wheel transmission -->
+    <xacro:joint_trans joint_name="left2link" />
+    <xacro:joint_trans joint_name="right2link" />
+
+    <!-- controller -->
+    <gazebo>
+        <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+            <rosDebugLevel>Debug</rosDebugLevel>
+            <publishWheelTF>false</publishWheelTF>
+            <robotNamespace>/</robotNamespace>
+            <publishTf>1</publishTf>
+            <publishWheelJointState>false</publishWheelJointState>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>100.0</updateRate>
+            <legacyMode>false</legacyMode>
+            <leftJoint>left2link</leftJoint>                     <!-- leftwheel joint -->
+            <rightJoint>right2link</rightJoint>                  <!-- rightwheel joint -->
+            <wheelSeparation>${base_link_radius * 2}</wheelSeparation>      <!-- wheel separation -->
+            <wheelDiameter>${wheel_radius * 2}</wheelDiameter>              <!-- wheel diameter -->
+            <broadcastTF>1</broadcastTF>
+            <wheelTorque>30</wheelTorque>                                   <!-- wheel torque -->
+            <wheelAcceleration>1.8</wheelAcceleration>                      <!-- wheel acceleration -->
+            <commandTopic>cmd_vel</commandTopic>                            <!-- move topic -->
+            <odometryFrame>odom</odometryFrame> 
+            <odometryTopic>odom</odometryTopic>                             <!-- odometry topic -->
+            <publishOdomTF>true</publishOdomTF>
+            <odometrySource>world</odometrySource>
+            <robotBaseFrame>base_footprint</robotBaseFrame>                 <!-- robot base frame -->
+        </plugin>
+    </gazebo>
+</robot>

@@ -1,0 +1,18 @@
+# 地图文件路径
+image: /home/shan/NutCloud/NutSync/Code/08-ROS/tutorial-autorobotic/ws-autorobotics/src/test08_nav/map/nav.pgm
+
+# 分辨率 米/像素
+resolution: 0.05000
+
+# 地图位姿 相对于rviz原点位姿, x偏移量，y偏移量，rz偏航角度 rad
+origin: [-50.0, -50.0, 0.000000]
+
+
+# 地图：白色可通行区域，黑色障碍物，蓝灰色未知区域
+# 占用阈值
+occupied_thresh: 0.65
+# 空闲阈值
+free_thresh: 0.196
+# 取反
+negate: 0
+

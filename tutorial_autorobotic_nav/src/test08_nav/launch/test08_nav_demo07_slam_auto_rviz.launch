@@ -1,0 +1,17 @@
+<launch>
+    <!-- gazebo 仿真 -->
+    <include file="$(find test07_gazebo)/launch/test07_demo03_gazebo_world.launch" />
+
+    <!-- slam 实现 -->
+    <include file="$(find test08_nav)/launch/test08_nav_demo01_gmapping.launch"/>
+
+    <!-- movebase 实现 -->
+    <include file="$(find test08_nav)/launch/test08_nav_demo05_movebase.launch" />
+
+    <!-- rviz -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find test08_nav)/rviz/myrobot_slam_auto.rviz"/>
+    <node pkg="joint_state_publisher" name="joint_state_publisher" type="joint_state_publisher" />
+    <node pkg="robot_state_publisher" name="robot_state_publisher" type="robot_state_publisher" />
+    
+    
+</launch>
