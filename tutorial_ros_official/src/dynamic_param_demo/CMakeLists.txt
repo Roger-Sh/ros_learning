@@ -1,15 +1,16 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(multi_thread_demo)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+project(dynamic_param_demo)
+set(CMAKE_EXPORT_COMPILE_COMMANDS on)
+
 
 # # Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+# add_compile_options(-std=c++11)
 
 # # Find catkin macros and libraries
 # # if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 # # is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-    message_runtime
+    dynamic_reconfigure
     roscpp
     rospy
     std_msgs
@@ -20,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 # # Uncomment this if the package has a setup.py. This macro ensures
 # # modules and global scripts declared therein get installed
-# # See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
+# # See http://ros.org/doc/api/catkin/hNo module named dynamic_reconfigure_parameter.parameter_generator_catkintml/user_guide/setup_dot_py.html
 # catkin_python_setup()
 
 # ###############################################
@@ -88,11 +89,13 @@ find_package(catkin REQUIRED COMPONENTS
 # #   * uncomment the "generate_dynamic_reconfigure_options" section below
 # #     and list every .cfg file to be processed
 
-# # Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-# cfg/DynReconf1.cfg
-# cfg/DynReconf2.cfg
-# )
+# Generate dynamic reconfigure parameters in the 'cfg' folder
+generate_dynamic_reconfigure_options(
+    # cfg/DynReconf1.cfg
+    # cfg/DynReconf2.cfg
+    cfg/dynamic_param.cfg
+)
+
 
 # ##################################
 # # catkin specific configuration ##
@@ -104,11 +107,9 @@ find_package(catkin REQUIRED COMPONENTS
 # # CATKIN_DEPENDS: catkin_packages dependent projects also need
 # # DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-    # INCLUDE_DIRS include
-
-    # LIBRARIES multi_thread_demo
-    CATKIN_DEPENDS message_runtime roscpp rospy std_msgs
-
+    INCLUDE_DIRS include
+    # LIBRARIES dynamic_param_demo
+    CATKIN_DEPENDS dynamic_reconfigure roscpp rospy std_msgs
     # DEPENDS system_lib
 )
 
@@ -119,14 +120,17 @@ catkin_package(
 # # Specify additional locations of header files
 # # Your package locations should be listed before other locations
 include_directories(
-
     # include
     ${catkin_INCLUDE_DIRS}
 )
 
+# dynamic_param_demo
+add_executable(dynamic_param_demo src/dynamic_param_demo.cpp)
+target_link_libraries(dynamic_param_demo ${catkin_LIBRARIES})
+
 # # Declare a C++ library
 # add_library(${PROJECT_NAME}
-# src/${PROJECT_NAME}/multi_thread_demo.cpp
+# src/${PROJECT_NAME}/dynamic_param_demo.cpp
 # )
 
 # # Add cmake target dependencies of the library
@@ -137,7 +141,7 @@ include_directories(
 # # Declare a C++ executable
 # # With catkin_make all packages are built within a single CMake context
 # # The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/multi_thread_demo_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/dynamic_param_demo_node.cpp)
 
 # # Rename C++ executable without prefix
 # # The above recommended prefix causes long target names, the following renames the
@@ -153,40 +157,6 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 # ${catkin_LIBRARIES}
 # )
-
-# publisher
-add_executable(publisher src/publisher.cpp)
-target_link_libraries(publisher ${catkin_LIBRARIES})
-
-# subscriber_multi_topic_single_thread
-add_executable(subscriber_multi_topic_single_thread src/subscriber_multi_topic_single_thread.cpp)
-target_link_libraries(subscriber_multi_topic_single_thread ${catkin_LIBRARIES})
-
-# subscriber_multi_topic_multi_thread
-add_executable(subscriber_multi_topic_multi_thread src/subscriber_multi_topic_multi_thread.cpp)
-target_link_libraries(subscriber_multi_topic_multi_thread ${catkin_LIBRARIES})
-
-# subscriber_single_topic_multi_thread
-add_executable(subscriber_single_topic_multi_thread src/subscriber_single_topic_multi_thread.cpp)
-target_link_libraries(subscriber_single_topic_multi_thread ${catkin_LIBRARIES})
-
-# subscriber_multi_topic_multi_thread_binded
-add_executable(subscriber_multi_topic_multi_thread_binded src/subscriber_multi_topic_multi_thread_binded.cpp)
-target_link_libraries(subscriber_multi_topic_multi_thread_binded ${catkin_LIBRARIES})
-
-# subscriber_multi_topic_multi_thread_customqueue
-add_executable(subscriber_multi_topic_multi_thread_customqueue src/subscriber_multi_topic_multi_thread_customqueue.cpp)
-target_link_libraries(subscriber_multi_topic_multi_thread_customqueue ${catkin_LIBRARIES})
-
-# multiListenerClassMultiThreadedSpinner
-add_executable(multiListenerClassMultiThreadedSpinner src/multiListenerClassMultiThreadedSpinner.cpp)
-target_link_libraries(multiListenerClassMultiThreadedSpinner ${catkin_LIBRARIES})
-
-# multiListenerClassAsyncSpinner
-add_executable(multiListenerClassAsyncSpinner src/multiListenerClassAsyncSpinner.cpp)
-target_link_libraries(multiListenerClassAsyncSpinner ${catkin_LIBRARIES})
-
-# add_dependencies(publisher multi_thread_demo_generate_messages_cpp)
 
 # ############
 # # Install ##
@@ -235,7 +205,7 @@ target_link_libraries(multiListenerClassAsyncSpinner ${catkin_LIBRARIES})
 # ############
 
 # # Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_multi_thread_demo.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_dynamic_param_demo.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 # target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
