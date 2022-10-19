@@ -1,0 +1,25 @@
+### collision_cloud srv msg
+## service request
+
+# origin coordinate, unit: m
+float32 origin_x
+float32 origin_y
+float32 origin_z
+
+# cloud param, unit: m
+float32 area_size
+float32 resolution
+
+# pub topic, prefix: /collision_object_cloud
+string topic
+
+# reference frame name, prefix: base_link
+string reference_frame
+
+# 1: start pub, 0: stop pub
+bool pub_flag
+
+---
+## service response
+int16 ret
+string msg

@@ -1,0 +1,34 @@
+# The name of this file shouldn't be changed, or else the Setup Assistant won't detect it
+sensors:
+  # point cloud
+  - sensor_plugin: occupancy_map_monitor/PointCloudOctomapUpdater
+    point_cloud_topic: /rs/point_cloud
+    max_range: 1.5
+    point_subsample: 2
+
+    padding_offset: 0.1  # unit m
+    padding_scale: 1    # 3
+
+    max_update_rate: 1
+    filtered_cloud_topic: filtered_cloud
+
+  - sensor_plugin: occupancy_map_monitor/PointCloudOctomapUpdater
+    point_cloud_topic: /collision_object_cloud
+    max_range: 1.5
+    point_subsample: 1
+    padding_offset: 0.1  # unit m
+    padding_scale: 1    # 3
+    max_update_rate: 0.1
+    filtered_cloud_topic: filtered_cloud
+
+  # depth image
+  # - sensor_plugin: occupancy_map_monitor/DepthImageOctomapUpdater
+  #   image_topic: /rs/depth_aligned_to_color
+  #   queue_size: 1
+  #   near_clipping_plane_distance: 0.3
+  #   far_clipping_plane_distance: 3
+  #   shadow_threshold: 0.2
+  #   padding_scale: 4.0
+  #   padding_offset: 0.03
+  #   max_update_rate: 0.5
+  #   filtered_cloud_topic: filtered_cloud

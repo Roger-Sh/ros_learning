@@ -1,0 +1,10 @@
+<launch>
+
+    <!-- launch collision_cloud_service -->
+    <node name="collision_cloud_service" pkg="aubo_demo" type="collision_cloud_service" output="screen"></node>
+
+    <!-- launch aubo_i5_catch_demo -->
+    <node name="aubo_i5_catch_demo" pkg="aubo_demo" type="aubo_i5_catch_demo" output="screen"></node>
+
+
+</launch>
