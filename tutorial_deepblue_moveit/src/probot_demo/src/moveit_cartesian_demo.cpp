@@ -55,7 +55,7 @@ int main(int argc, char **argv)
     ROS_INFO("finish home");
     sleep(1);
 
-    // 获取当前位姿数据最为机械臂运动的起始位姿
+    // 获取当前位姿数据作为机械臂运动的起始位姿
     geometry_msgs::Pose start_pose = arm.getCurrentPose(end_effector_link).pose;
 
     // 设置路点列表
