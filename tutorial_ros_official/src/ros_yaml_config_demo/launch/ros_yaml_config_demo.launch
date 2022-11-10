@@ -1,0 +1,7 @@
+<launch>
+
+    <!-- launch ros_yaml_config_demo with yaml config -->
+    <node name="ros_yaml_config_demo" pkg="ros_yaml_config_demo" type="ros_yaml_config_demo" output="screen">
+        <rosparam command="load" file="$(find ros_yaml_config_demo)/config/param.yaml" />
+    </node>
+</launch>

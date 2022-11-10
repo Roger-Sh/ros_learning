@@ -38,7 +38,6 @@
 // class QLineEdit;
 // class QPushButton;
 
-
 namespace rviz_teleop_commander
 {
     // 所有的plugin都必须是rviz::Panel的子类
@@ -60,7 +59,6 @@ namespace rviz_teleop_commander
     public Q_SLOTS:
         // 当用户输入topic的命名并按下回车后，回调用此槽来创建一个相应名称的topic publisher
         void setTopic(const QString &topic);
-
 
     // 内部槽.
     protected Q_SLOTS:

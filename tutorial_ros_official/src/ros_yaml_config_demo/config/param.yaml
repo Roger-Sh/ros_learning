@@ -1,0 +1,4 @@
+test_param_string: "this is a string param"
+test_param_int: 3
+test_param_double: 3.3
+test_param_vec: [3.3, 4.4, 5.5, 6.6]
