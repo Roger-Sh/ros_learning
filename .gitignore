@@ -10,7 +10,7 @@
 
 
 # vscode related
-.vscode
+.vscode/
 
 # ros related
 devel/
