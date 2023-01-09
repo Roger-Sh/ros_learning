@@ -1,3 +1,5 @@
+# vscode related
+.vscode/browse.*
 
 # self defined
 *.engine
@@ -7,10 +9,6 @@
 # model
 *.onnx
 *.trt
-
-
-# vscode related
-.vscode/
 
 # ros related
 devel/
