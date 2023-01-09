@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(beginner_tutorials)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+SET(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
