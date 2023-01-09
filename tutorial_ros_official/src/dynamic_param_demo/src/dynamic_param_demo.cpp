@@ -3,7 +3,7 @@
 // Dynamic reconfigure includes.
 #include <dynamic_reconfigure/server.h>
 // Auto-generated from cfg/ directory.
-#include <dynamic_param_demo/dynamic_param_demoConfig.h>
+#include "dynamic_param_demo/dynamic_param_demoConfig.h"
 
 std::string s;
 int num;
