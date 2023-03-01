@@ -44,7 +44,7 @@
             "compileCommands": "${workspaceFolder}/build/compile_commands.json"
             ```
 
-    -   vscode `launch.json` 添加 `GDB`， `Launch` 以及 `Attack` 模式
+    -   vscode `launch.json` 添加 `GDB`， `Launch` 以及 `Attach` 模式
 
         -   ```json
             {

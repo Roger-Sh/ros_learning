@@ -1,0 +1,3 @@
+<launch>
+    <node name="service_node_multi_server" pkg="ros_multithread_test" type="service_node_multi_server" output="screen"/>
+</launch>
