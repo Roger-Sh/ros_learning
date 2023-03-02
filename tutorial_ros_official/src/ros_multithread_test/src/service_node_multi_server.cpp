@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include "ros_multithread_test/AddTwoInts.h"
+#include <mutex>
 
 /**
  * @brief class ServiceNodeMultiServer
@@ -26,12 +27,21 @@ private:
 
     // ros server
     ros::ServiceServer server1_;
+    std::mutex server1_mutex_;
+
     ros::ServiceServer server2_;
     ros::ServiceServer server3_;
 
 private:
     bool server1_callback(ros_multithread_test::AddTwoInts::Request &req, ros_multithread_test::AddTwoInts::Response &res)
     {
+        // check lock
+        if (!this->server1_mutex_.try_lock())
+        {
+            ROS_WARN_STREAM("server1 is busy");
+            return false;
+        }
+
         ROS_WARN_STREAM("server1 get req, a: " << req.a << ", b: " << req.b);
         res.sum = req.a + req.b;
 
@@ -44,6 +54,10 @@ private:
         }
 
         ROS_WARN_STREAM("server1 send res, sum: " << res.sum);
+
+        // unlock
+        this->server1_mutex_.unlock();
+
         return true;
     }
 

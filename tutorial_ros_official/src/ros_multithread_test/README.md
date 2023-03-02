@@ -79,7 +79,8 @@
     -   如果一个节点在不间断发布消息的同时
         -   需要作为 service server 或 action server 提供服务
             -   使用Asyncspinner开启多线程模式
-            -   可以通过加锁的方式避免同时重复调用同一个server
+            -   可以通过加mutex锁的方式避免同时重复调用同一个server
+                -   不建议通过bool flag，因为仍然有概率会同时访问这个变量。
         -   需要使用有可能产生堵塞的 service client，
             -   通过临时增加一个线程，但要注意不重复调用
         -   需要使用有可能产生堵塞的 action client

@@ -79,6 +79,8 @@ public:
 
             std::thread thread_call_client1{&ServiceNodeMultiClient::CallClient1, this};
             ROS_WARN_STREAM("thread_call_client1");
+            // sleep(1);
+
             std::thread thread2_call_client1{&ServiceNodeMultiClient::CallClient1, this};
             ROS_WARN_STREAM("thread_call_client1");
             // non-blocking: number of client call will increase massively
