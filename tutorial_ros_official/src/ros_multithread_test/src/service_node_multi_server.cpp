@@ -63,8 +63,8 @@ int main(int argc, char **argv) {
     // create node
     ServiceNodeMultiServer node_multi_server;
 
-    // set thread_count = number of CPU core
-    ros::AsyncSpinner spinner(3);   
+    // set thread_count 0 = number of CPU core
+    ros::AsyncSpinner spinner(0);   
     spinner.start();
 
     // main loop

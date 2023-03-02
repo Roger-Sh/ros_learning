@@ -1,0 +1,3 @@
+<launch>
+    <node name="action_node_multi_client" pkg="ros_multithread_test" type="action_node_multi_client" output="screen"/>
+</launch>

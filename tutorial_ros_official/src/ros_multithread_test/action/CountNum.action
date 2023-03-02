@@ -1,0 +1,10 @@
+# requeset
+uint32 count_target 
+
+---
+# response
+uint32 count_result
+
+---
+# feedback
+float32 count_current
