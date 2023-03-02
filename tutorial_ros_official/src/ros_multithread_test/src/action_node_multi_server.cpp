@@ -35,9 +35,9 @@ private:
     {
         ros_multithread_test::CountNumFeedback feedback;
 
-        ROS_INFO_STREAM("server1 sleep 10s");
-        sleep(5);
-        ROS_INFO_STREAM("server1 sleep finished");
+        // ROS_INFO_STREAM("server1 sleep 10s");
+        // sleep(5);
+        // ROS_INFO_STREAM("server1 sleep finished");
 
         ros::Rate rate(1);
         for (int i = 0; i < goal->count_target; i++)
@@ -106,7 +106,8 @@ int main(int argc, char **argv)
 
     /**
      * @brief ros::spin()
-     * 单纯的spin，无法在主循环中加入额外操作，
+     * 单纯的spin，无法在主循环中加入额外操作
+     * action server callback 是多线程的
      */
 
     // // ros spin
@@ -114,11 +115,10 @@ int main(int argc, char **argv)
     // ros::spin();
 
     /**
-     * @brief ros::Asyncspinner
-     * 多线程模式
+     * @brief ros::spinOnce()
+     * 可以在主循环中加入额外操作
+     * action server callback 是多线程的
      */
-    ros::AsyncSpinner spinner(0);
-    spinner.start();
 
     int count = 0;
     ros::Rate rate(1);
@@ -127,7 +127,25 @@ int main(int argc, char **argv)
         ROS_INFO_STREAM("main count: " << count);
         count++;
         rate.sleep();
+        ros::spinOnce();
     }
+
+    /**
+     * @brief ros::Asyncspinner
+     * 多线程模式
+     */
+
+    // ros::AsyncSpinner spinner(0);
+    // spinner.start();
+
+    // int count = 0;
+    // ros::Rate rate(1);
+    // while(ros::ok())
+    // {
+    //     ROS_INFO_STREAM("main count: " << count);
+    //     count++;
+    //     rate.sleep();
+    // }
 
     return 0;
 }

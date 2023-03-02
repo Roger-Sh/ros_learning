@@ -17,20 +17,35 @@
 ## Service
 
 * server
-  * callback
-    * server callback 通过 AsyncSpinner 实现多线程响应, 多线程数量设置为0可以根据CPU核心数来分配线程，效率最高
-    * 尽量避免server中使用耗时操作, 耗时的操作可以使用action server
+  
+  * ros::spinOnce() 单线程模式
+    * server收到请求后，耗时操作会阻塞主线程
+    * 同一个节点，单个server，在单线程模式下同时只能响应一次，多次请求会根据顺序依次响应
+    * 同一个节点，多个server，在单线程模式下同时只能有一个server作出响应，不同server接收的请求按照顺序执行
+  
+  
+  * ros::AsyncSpinner 多线程模式
+    * server收到请求后，耗时操作不会阻塞主线程
+    * 同一个节点，单个server，在多线程模式下可以同时响应 
+        * **这种模式有冲突隐患，可以在server端设置锁，防止同一个server同时响应多个client的请求**
+        * **同一个节点内需要不间断发布状态时仍然有必要采用多线程的server模式**
+  
+    * 同一个节点，多个server，在多线程模式下可以同时响应
+    * 多线程数量设置为0可以根据CPU核心数来分配线程，效率最高
+    * 尽量避免server中使用耗时操作, 耗时的操作推荐使用 action server
+  
 * client
-  * ROS client 没有 non-blocking 的方式，尽量避免client调用太耗时
+  * ROS client 没有非阻塞式的方式的方式，尽量避免client调用太耗时
   * 如果必须要使用非阻塞式的方式使用client，可以通过std::thread新建一个线程，不过要注意线程数量，防止线程数量爆炸式增长。最好一个client同时只调用一次。
 
 
 
 ## Action
 
-* client
+* action client
   * waitForServer()
     * 是阻塞式的
+    * 可以在程序初始阶段统一开始连接
     * 单线程模式下该方法不会有效果，因为主线程被阻塞，将无法得到server端的回应
       * 单线程模式指client初始化时没有将spin_thread设置为true，或者没有任何spin操作
       * action client 初始化时将spin_thread 设置为true, 或者在 action cleint 初始化之前使用Asycspinner，可以收到server连接的回应。
@@ -40,14 +55,32 @@
     * 也可以不绑定，通过waitForResult获取结果
   * waitForResult()
     * 是阻塞式的
-    * 可以不使用waitForResult, 通过绑定callback响应动作的反馈消息和结果消息。这样便可以使client的使用不阻塞。
-* server
-  * ros::spin()模式 与 ros::Asyncspinner 模式对server端效果相同
+    * 不阻塞使用client的方法
+        * 不使用waitForResult, 通过绑定callback响应动作的反馈消息和结果消息。
+* action server
+  * ros::spinOnce()模式 与 ros::Asyncspinner 模式
+      * 同一节点内不同server之间是多线程的
+      * 同一节点内同一server是单线程的
+      * 均不会阻塞主线程
+      * Asyncspinner模式下，同一个server可以接收不同的请求，按顺序执行
+      * spinOnce模式下，同一个server的同一时刻只能接收一个请求，这里的同一时刻取决于spinOnce的频率
   * 同一个节点内同一个server会顺序执行收到的消息
-
+  
     * client端，同一个client连续发送，第二次会打断第一次的callback，因为同一个callback被第二次呼叫征用了，所以第一次的callback不会再起作用，而第二次的callback会等server端把第一次的动作执行完成之后，才会开始收到第二次的反馈
-    * server端，单线程按顺序执行
+    * server端，同一server一直按照单线程顺序执行
   * 同一个节点内不同server，可以同时响应消息
-
+  
     * client端，不同client同时呼叫不同server，client端会多线程响应。
     * server端不同server多线程响应。比如server1被耗时操作阻塞，server2仍能响应。
+
+
+
+-   总结
+    -   如果一个节点在不间断发布消息的同时
+        -   需要作为 service server 或 action server 提供服务
+            -   使用Asyncspinner开启多线程模式
+            -   可以通过加锁的方式避免同时重复调用同一个server
+        -   需要使用有可能产生堵塞的 service client，
+            -   通过临时增加一个线程，但要注意不重复调用
+        -   需要使用有可能产生堵塞的 action client
+            -   通过callback处理反馈信息，不使用waitForResult()
