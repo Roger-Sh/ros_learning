@@ -1,0 +1,36 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/shan/AIFORCETECH/SmartPickingRobot/4dof_sucker_project/devel/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/6dof_ringcut_project/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/6dof_ringcut_project/src/aubo_robot/aubo_controller/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/6dof_ringcut_project/src/aubo_robot/aubo_driver/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/6dof_ringcut_project/src/aubo_robot/aubo_kinematics/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/6dof_ringcut_project/src/aubo_robot/aubo_msgs/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/4dof_sucker_project/src/bwtf_ros_driver/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/4dof_sucker_project/src/catch_task/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/4dof_sucker_project/src/chassis_ros_driver/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/4dof_sucker_project/src/cv_bridge/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/4dof_sucker_project/src/hitbot_meta/hitbot_zarm_ros_driver/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/6dof_ringcut_project/src/ringcutter_ros_driver/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/4dof_sucker_project/src/rs_ros_wrapper/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/4dof_sucker_project/src/sucker_ros_driver/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/6dof_ringcut_project/src/tomato_rec_ringcut/include/**",
+        "/home/shan/AIFORCETECH/SmartPickingRobot/4dof_sucker_project/src/tomato_rec_sucktask/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

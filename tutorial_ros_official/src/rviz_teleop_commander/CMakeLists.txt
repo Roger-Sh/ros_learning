@@ -18,20 +18,18 @@ link_directories(${catkin_LIBRARY_DIRS})
 # # # Here we specify which header files need to be run through "moc",
 # # # Qt's meta-object compiler.
 # qt4_wrap_cpp(MOC_FILES
-#     src/teleop_pad.h
+# src/teleop_pad.h
 # )
 
 # find qt5
-set(Qt5QtCore_DIR /usr/lib/x86_64-linux-gnu/cmake) 
+set(Qt5QtCore_DIR /usr/lib/x86_64-linux-gnu/cmake)
 find_package(Qt5 COMPONENTS Core Gui REQUIRED)
-find_package(Qt5Widgets) 
-
-
+find_package(Qt5Widgets)
 
 # set head with qt
-qt5_wrap_cpp(TELEOP_PAD_HEAD src/teleop_pad.h )
+qt5_wrap_cpp(TELEOP_PAD_HEAD src/teleop_pad.h)
 
-# set src 
+# set src
 set(TELEOP_PAD_SRC
     src/teleop_pad.cpp
     ${TELEOP_PAD_HEAD}
@@ -69,5 +67,3 @@ install(TARGETS
 install(FILES
     plugin_description.xml
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
-
