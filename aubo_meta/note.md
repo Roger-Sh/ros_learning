@@ -262,3 +262,93 @@ catkin_make
     -   octomap可用于路径规划的避障操作
 
         
+
+
+
+## Note
+
+### 梳理 moveit -> aubo_driver 的数据链路
+
+-   moveit 作为 action client 发送指令 aubo_i5H_controller/follow_joint_trajectory
+    -   13个点
+    -   顺序有问题，第一关节顺序不对
+    -   moveit 是通过关节名称对关节数据进行的排序！！
+-   joint_trajecotry_action 作为 action server 接受指令 aubo_i5H_controller/follow_joint_trajectory
+-   joint_trajecotry_action 作为 publisher 发布 /joint_path_command
+    -   13个点，数据与 aubo_i5H_controller/follow_joint_trajectory 一致
+-   aubo_robot_simulator 作为 subscriber 订阅 /joint_path_command
+-   aubo_robot_simulator 作为 publisher 发布 moveItController_cmd
+    -   将13个点进行插值，同时这里前三个关节位置进行了调换(顺序问题是从aubo_i5H_controller/follow_joint_trajectory开始的，moveit 按照关节名称的顺序进行排序，这里反而是正确的)
+-   aubo_driver 作为 subscriber 订阅 moveItController_cmd
+    -   方案1：这里我们可以尝试直接发布 ，绕过中间的aubo_robot_simulator
+        -   接受的实际是aubo_robot_simulator已经规划完成的路径，时间切片非常小，可以先尝试发布moveit的原始规划路径
+    -   方案2：aubo_driver 中实现一个action，用于调用aubo 的 moveJ 或moveL
+    -   方案3：自己实现替代 aubo_robot_simulator 的路径规划插值功能，发布 moveItController_cmd
+
+-   joint_trajecotry_action.cpp
+
+    -   ```c++
+        // 初始化 action server
+        controller_name = "aubo_i5H_controller/follow_joint_trajectory";
+        action_server_(
+            node_,
+            controller_name,
+            boost::bind(&JointTrajectoryAction::goalCB, this, _1),
+            boost::bind(&JointTrajectoryAction::cancelCB, this, _1),
+            false),
+        
+        // 发布 /joint_path_command
+        pub_trajectory_command_ = node_.advertise<trajectory_msgs::JointTrajectory>("joint_path_command", 100);
+        
+        // in JointTrajectoryAction::goalCB
+        pub_trajectory_command_.publish(current_traj_);
+        
+        ```
+
+-   aubo_robot_simulator.py
+
+    -   ```python
+        # 订阅 /joint_path_command
+        self.joint_path_sub = rospy.Subscriber('joint_path_command', JointTrajectory, self.trajectory_callback)
+        
+        # 初始化动作控制对象
+        self.motion_ctrl = MotionControllerSimulator(num_joints, update_rate=motion_update_rate)
+        
+        # 获取路径点
+        self.motion_ctrl.add_motion_waypoint(point)
+        ```
+
+    -   ```python
+        # 运动线程
+        self.motion_thread = threading.Thread(target=self._motion_worker)
+        
+        # 移动下一点
+        self._move_to(intermediate_goal_point, update_duration.to_sec())
+        self.joint_state_publisher()
+        
+        # 实际发送下一点的位置
+        # 发送 /moveItController_cmd
+        self.moveit_joint_state_pub = rospy.Publisher('moveItController_cmd', JointTrajectoryPoint, queue_size=2000)
+        self.moveit_joint_state_pub.publish(joint_point_msg)
+        
+        ```
+
+-   aubo_driver
+
+    -   ```c++
+        // 订阅 /moveItController_cmd
+        moveit_controller_subs_ = nh_.subscribe("moveItController_cmd", 2000, &AuboDriver::moveItPosCallback, *this*);
+        
+        // in moveItPosCallback
+        // add points to buf_queue_
+        buf_queue_.push(ps);
+        
+        // in updateControlStatus
+        setRobotJointsByMoveIt();
+        
+        // in setRobotJointsByMoveIt()
+        ret = robot_send_service_.robotServiceSetRobotPosData2Canbus(jointAngle);
+        ```
+
+
+
