@@ -1,5 +1,7 @@
 # vscode related
-.vscode/browse.*
+.vscode/
+*/.vscode
+/.vscode/
 
 # self defined
 *.engine
