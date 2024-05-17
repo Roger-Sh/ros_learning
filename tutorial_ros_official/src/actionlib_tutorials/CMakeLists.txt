@@ -69,7 +69,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate actions in the 'action' folder
 add_action_files(
   DIRECTORY action 
-  FILES Fibonacci.action DoDishes.action
+  FILES Fibonacci.action DoDishes.action PrintNum.action
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -228,3 +228,11 @@ add_dependencies(dodishes_server ${actionlib_tutorials_EXPORTED_TARGETS})
 add_executable(dodishes_client src/dodishes_client.cpp)
 target_link_libraries(dodishes_client ${catkin_LIBRARIES})
 add_dependencies(dodishes_client ${actionlib_tutorials_EXPORTED_TARGETS})
+
+add_executable(printnum_server src/printnum_server.cpp)
+target_link_libraries(printnum_server ${catkin_LIBRARIES})
+add_dependencies(printnum_server ${actionlib_tutorials_EXPORTED_TARGETS})
+
+add_executable(printnum_client src/printnum_client.cpp)
+target_link_libraries(printnum_client ${catkin_LIBRARIES})
+add_dependencies(printnum_client ${actionlib_tutorials_EXPORTED_TARGETS})

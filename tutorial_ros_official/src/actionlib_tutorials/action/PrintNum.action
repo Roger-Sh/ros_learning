@@ -1,0 +1,14 @@
+# goal definition 目标
+int32 num
+int32 print_times
+---
+# result definition 结果
+string result_msg
+string ResultMsgFinished="Finished"
+string ResultMsgCanceled="Canceled"
+
+int32 printed_cnt
+
+---
+# feedback 反馈
+int32 printed_cnt
