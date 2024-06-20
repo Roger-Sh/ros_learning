@@ -1,14 +1,12 @@
 # 机械臂理论介绍
 
-- 串联机械臂理论
-
-  - 机械臂类型
-  - 机械臂坐标系表达与转换
-  - 机械臂运动学
-  - 机械臂动力学
-  - 机械臂运动规划
-  - 机械臂运动控制
-  - 机械臂视觉应用
+- 机械臂类型
+- 机械臂坐标系表达与转换
+- 机械臂运动学
+- 机械臂动力学
+- 机械臂运动规划
+- 机械臂运动控制
+- 机械臂视觉应用
 
 ## 串联机械臂理论简介
 
@@ -1130,26 +1128,667 @@ $$
 
 ### 机械臂运动规划
 
-- 路径规划（只考虑路径，不考虑时间、速度、加速度等）
+#### 路径规划与轨迹规划概念
+
+- 路径：只包含几何意义上的点位数据
+
+- 路径规划：从所有可能的几何路径集合中找到所需的路径。该路径描述了从起始点到终点。在期间无需考虑时间因素。
+
+- 轨迹：包含点位数据以及时间相关信息
+
+- 轨迹规划：路径规划的下一阶段，考虑该系统如何以合适的速度、加速度等运动学约束，将路径规划后的离散点位进行链接。相比路径规划，轨迹规划更多的考虑时间、速度、加速度等与运动性能相关的指标。
+
+
+
+#### 机械臂中的路径规划
+
+- 关节空间路径规划
+
+  - 在关节空间中进行简单直线规划，在笛卡尔空间中并不是直线运动
+  - 在关节空间进行规划，可以避免奇异性问题，计算消耗小（无需逆解），但在规划完成之前无法预见笛卡尔空间中的路径，需要关注潜在的碰撞问题。
+
+  <img src="robot_arm_note.assets/image-20240617170451017.png" alt="image-20240617170451017" style="zoom: 67%;" />
+
+- 笛卡尔空间路径规划
+
+  - 在笛卡尔空间中进行直线运动，在关节空间中并不是直线规划。
+  - 在笛卡尔空间进行规划，可以直观设置末端路径，但无法完全避免关节奇异性。获取的路径在转换为关节轨迹时需要进行逆解算、轨迹平滑处理等操作。
+
+  <img src="robot_arm_note.assets/image-20240617170511048.png" alt="image-20240617170511048" style="zoom:67%;" />
+
+- 智能路径规划
 
   - 基于采样
+
     - 基于采样的方法不需要完整表示位型空间，所以非常适合高维和复杂环境问题，且相比 search-based （A* D*等）方法，能更有效的处理非凸和杂乱的环境。但是 sampling-based 方法只具有概率完备性，不一定总能找到最优解，解的质量取决于采样点的数量和分布；很难处理动力学等复杂约束问题；不能保证解的有一致性，比如相似的起点或者终点状态，生成的解不能保证是相似的，无法对规划结果进行预判，这就使得自动规划的机器人无法进入极端追求稳定性的工业领域。
-    
+
     - 例：PRM，RRT，RRT*，OMPL（MoveIt 默认机械臂路径规划库）
-    
+
       - [RRT,RRT-Star 和 RRT-Star-Smart](https://zhuanlan.zhihu.com/p/161829703)
       - [Rapidly exploring random tree](https://en.wikipedia.org/wiki/Rapidly_exploring_random_tree#cite_note-incremental-8)
-    
-    - demo: cpprobotics/ArmNavigation/RRTStarSevenJointArmControl
-    
+
+    - demo: cpprobotics/ArmNavigation/RRTStarSevenJointArmControl (在7轴机械臂关节空间中进行RRT避障寻路)
+
       <img src="robot_arm_note.assets/Peek 2024-06-11 17-57.gif" alt="Peek 2024-06-11 17-57" style="zoom:50%;" />
-    
+
   - 基于优化
+
     - 将运动规划问题表述为一个优化问题，目标是在满足机器人环境约束和动力学约束下，找到优化某个成本函数的轨迹。可以设计各种成本函数来实现不同的优化目标，比如最短路径、最优时间、最优能量等。基于优化的方法可以找到高质量的解决方案，且解具有一致性，可以处理机器人动力学和环境的复杂约束。但是 optimization-based 方法计算成本很高，尤其是对于高维系统；需要准确的机器人动力学和环境模型，这在实践中可能很难得到；在复杂环境下容易陷入局部最优解。
     - 例：CHOMP、STOMP
+
   
-- 轨迹规划（考虑时间、速度、加速度）
+
+#### 机械臂中的轨迹规划
+
+- 轨迹坐标
+
+  - 为了简化在时间对轨迹规划的影响，引入轨迹坐标，
+    $$
+    s, 0<s<1, \\
+    \boldsymbol{x}(t) = \boldsymbol{x}(s(t)) = \boldsymbol{x}(s)
+    $$
+
+##### 点对点轨迹规划 （PTP，PointToPoint）
+
+- 该规划通常应用于**关节空间规划**，即主要关注关节空间轨迹插值方法
+
+- 给定时间，初始关节状态，目标关节状态（通过逆运动学获取），计算各关节加速-减速的方式
+
+- 简单的关节空间轨迹插值方法：
+
+  - 速度梯形图（C1连续） VS 加速度梯形图（C2连续）
+
+    <img src="robot_arm_note.assets/image-20240617182945319.png" alt="image-20240617182945319" style="zoom: 67%;" />
+
+    
+
+##### 连续路径的轨迹规划（CP Continuous-Path）
+
+- 概念
+
+  - 该规划通常应用于**笛卡尔空间规划**，主要关注笛卡尔空间中机械臂末端的位姿、位姿速度、位姿加速度的插值问题
+  - 该规划方法一般需要满足笛卡尔空间中的特定规则，如直线轨迹规划、圆形轨迹规划，或者需要通过预先给定的路点、避免障碍物等
+  - 在笛卡尔空间中的路径规划后，一般需要通过逆运动学计算各个点位在关节空间中的配置，并进行关节空间的轨迹规划。
+  - 关节空间轨迹规划完成后，还可以进一步转换为笛卡尔轨迹，用于进行障碍物判断，或与目标笛卡尔空间轨迹规划进行对比。
+
+- 线段轨迹规划
+  $$
+  \boldsymbol{x}_\mathrm{E}(t)=\boldsymbol{x}_\mathrm{E,S}+s(t)\left(\boldsymbol{x}_\mathrm{E,Z}-\boldsymbol{x}_\mathrm{E,S}\right)
+  $$
+
+- 圆弧轨迹规划
+  $$
+  \left._{(0)}\boldsymbol{x}_\mathrm{E}(t)=_{(0)}\boldsymbol{x}_\mathrm{M}+{}^0\boldsymbol{R}_\mathrm{M} \left(\begin{array}{c}\cos(s(t) \varphi_\mathrm{max})\\\sin(s(t) \varphi_\mathrm{max})\\0\end{array}\right.\right)\underbrace{\left\|_{(\mathrm{M})}\boldsymbol{x}_\mathrm{P_1}-_{(\mathrm{M})}\boldsymbol{x}_\mathrm{M}\right\|_2}_{=r}
+  $$
+  ![image-20240618094701372](robot_arm_note.assets/image-20240618094701372.png)
+
+
+
+##### 轨迹插值
+
+- 实际应用中，机械臂的轨迹通常由多段组成，当运动方向发生突变时，会产生巨大的加速度，造成运行的不稳定，因此需要针对多段轨迹进行平滑插值处理。
+
+- 轨迹平滑插值处理在关节空间与笛卡尔空间中均有运用。
+
+- 例：平滑处理两段轨迹构成的直角，将速度的突变用梯形速度变化代替
+
+  ![image-20240618103553783](robot_arm_note.assets/image-20240618103553783.png)
+
+  ![image-20240618103614637](robot_arm_note.assets/image-20240618103614637.png)
+
+###### 位移变化的轨迹插值
+
+- 常见算法
+  - 梯形速度插值
+  - 抛物线拟合线性插值
+  - 三/五次多项式插值
+  - 三/五次样条插值
+  - 贝塞尔曲线
+  - TOPP
+- 参考
+  - [关节空间路径/轨迹规划算法](https://zhuanlan.zhihu.com/p/446463459)
+  - [二次与三次B样条曲线c++实现](https://blog.csdn.net/jiangjjp2812/article/details/100176547?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-3.no_search_link&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-3.no_search_link)
+  - [B样条曲线](https://zhuanlan.zhihu.com/p/445466952)
+
+###### 旋转变化的轨迹插值
+
+- 欧拉角插值
+  - 通过对欧拉角插值，获取其对应的旋转角度、旋转角速度、旋转角加速度
+
+- 轴角旋转插值
+  - 将目标旋转矩阵通过轴角方式进行表达
+  - 旋转轴在插值过程中保持不变
+  - 旋转角在此过程中从初始角度旋转到目标角度
+
+- 四元数插值
+  - LERP 线性插值
+    $$
+    v=\text{Lerp}(v_0,v_1,t)=(1-t)v_0+tv_1
+    $$
+    
+    - 用于在两个点之间进行直线插值。适用于数值、位置、颜色等，可以用于平滑过渡
+    
+    - 对于四元数来说，LERP 每帧得出的旋转结果是不均匀
+    
+      <img src="robot_arm_note.assets/7c6180ec1f6803707da58e59e807c88b.png" alt="img" style="zoom:50%;" />
+    
+  - SLERP 球面线性插值
+    $$
+    \boldsymbol{q}_t=\text{Slerp}(\boldsymbol{q}_0,\boldsymbol{q}_1,t)=\frac{\sin((1-t)\theta)}{\sin\theta}\boldsymbol{q}_0+\frac{\sin(t\theta)}{\sin\theta}\boldsymbol{q}_1 \\
+    \theta=\cos^{-1}(\boldsymbol{q}_0\cdot \boldsymbol{q}_1)
+    $$
+    
+
+    - 用于在两个方向之间进行插值，沿球面弧线插值。常用于旋转插值
+
+    - 对于四元数来说，SLERP 每帧得出的旋转结果均匀
+
+      <img src="robot_arm_note.assets/5da4c9de0f0e8c5d02247dc1c2ffae49.png" alt="img" style="zoom:50%;" />
+
+      <img src="robot_arm_note.assets/image-20240619110011990.png" alt="image-20240619110011990" style="zoom: 67%;" />
+
+  - 参考
+    - [WIKI-SLERP](https://en.wikipedia.org/wiki/Slerp)
+    - [线性插值解释](https://www.zhihu.com/question/353481946/answer/3244220249)
+  - 通过四元数对方向进行插值计算的优点
+    - 计算方便
+    - 区分位移和方向的插值
+    - 无奇异性
+
+###### 旋转+位移的轨迹插值
+
+$$
+^\mathrm{s}\boldsymbol{T}_\mathrm{E}(s(t),t_\mathrm{rel})=
+\left(\begin{array}{c|c}
+^\mathrm{s}\boldsymbol{R}_\mathrm{E}(t_\mathrm{rel}) & _\mathrm{(S)}\boldsymbol{r}_\mathrm{SE}(s(t)) \\ \hline
+0\ 0\ 0&1
+\end{array}\right)
+
+\\ \\
+
+_{(0)}\boldsymbol{r_\mathrm{SE}}=s(t)\begin{pmatrix}_{(0)}\boldsymbol{r_\mathrm{Z}}-_{(0)}\boldsymbol{r_\mathrm{S}}\end{pmatrix}
+
+\\ \\
+
+_{(\mathrm{S})}\boldsymbol{r}_\mathrm{SE}={}^\mathrm{S}\boldsymbol{R}_{0 (0)}\boldsymbol{r}_\mathrm{SE}={}^\mathrm{S}\boldsymbol{R}_0 s(t)\left({}_{(0)}\boldsymbol{r}_\mathrm{Z}-{}_{(0)}\boldsymbol{r}_\mathrm{S}\right)
+$$
+
+<img src="robot_arm_note.assets/image-20240619110559835.png" alt="image-20240619110559835" style="zoom: 80%;" />
+
+
 
 
 
 ### 机械臂动力学
+
+- 概念
+  - 用于计算特定运动所需的机器人驱动力和/或扭矩
+  - 动力学包含对有质量的物体在力和力矩影响下运动的研究。因此，动力学描述了运动变量和力变量之间的联系。
+
+#### 正动力学
+
+- 正动力学公式：
+  $$
+  \ddot{\boldsymbol{q}}(t)=\boldsymbol{f}_\mathrm{D}(\boldsymbol{q}(t),\dot{\boldsymbol{q}}(t),\boldsymbol{\tau}(t),\boldsymbol{\mathcal{F}}(t))
+  $$
+
+  - 关节角度、角速度、角加速度：$\boldsymbol{q}, \dot{\boldsymbol{q}}, \ddot{\boldsymbol{q}}$
+  - 关节力矩：$\boldsymbol{\tau}$
+  - 末端负载：$\boldsymbol{\mathcal{F}}$
+
+- 应用
+
+  - 机械臂运动仿真，需要精确的模型参数
+
+
+
+#### 逆动力学
+
+##### 概念
+
+- 逆动力学公式
+  $$
+  \boldsymbol{\tau}(t)=\boldsymbol{g}_\mathrm{D}(\boldsymbol{q}(t),\dot{\boldsymbol{q}}(t),\ddot{\boldsymbol{q}}(t),\boldsymbol{\mathcal{F}}(t))
+  $$
+
+  - 关节力矩：$\boldsymbol{\tau}$
+  - 关节角度、角速度、角加速度：$\boldsymbol{q}, \dot{\boldsymbol{q}}, \ddot{\boldsymbol{q}}$
+  - 末端负载：$\boldsymbol{\mathcal{F}}$
+
+- 逆动力学一般形式
+  $$
+  \boldsymbol{\tau}=\boldsymbol{M}(q)\ddot{\boldsymbol{q}}+\boldsymbol{c}(\boldsymbol{q},\dot{\boldsymbol{q}})+\boldsymbol{g}(\boldsymbol{q})+\boldsymbol{h}(\boldsymbol{q},\dot{\boldsymbol{q}})
+  $$
+
+  - 关节力矩：$\boldsymbol{\tau}, n\times 1$
+  - 惯性项：$\boldsymbol{M}, n\times n$
+  - 离心力项：$\boldsymbol{c}, n\times 1$
+  - 重力项：$\boldsymbol{g}, n\times 1$
+  - 非线性项（摩擦力等）：$\boldsymbol{h},  n \times 1$
+
+- 逆动力学求解方法
+  - 牛顿欧拉法
+    - 分段分析机械臂各关节的受力情况
+  - 拉格朗日法
+    - 通过势能守恒与做功分析进行动力学建模
+
+
+
+
+
+##### 牛顿欧拉法
+
+1. 分离机械臂各关节，确认各关节段的重心 $S_i$ 
+
+2. 确认基于基底坐标系 $\text{(KS)}_0$ 的重心位移向量 $_{(0)}\boldsymbol{r}_{S_i}$、重心位移速度 $_{(0)}\boldsymbol{\dot{r}}_{S_i}$ 以及重心位移加速度 $_{(0)}\boldsymbol{\ddot{r}}_{S_i}$
+
+   ![](robot_arm_note.assets/image-20240619135716381.png)
+
+3. 确认基于基底坐标系 $\text{(KS)}_0$ 各关节段的的角速度 $_{(0)}\omega_i$ 以及角加速度 $_{(0)}\dot{\omega}_i$
+
+   - 方法1：
+
+   $$
+   \left.\boldsymbol{S}(_{(0)}\boldsymbol{\omega}_i)=_{(0)}\left(\begin{array}{ccc}0&-\omega_{z_i}&\omega_{y_i}\\\omega_{z_i}&0&-\omega_{x_i}\\-\omega_{y_i}&\omega_{x_i}&0\end{array}\right.\right)={}^0\dot{\boldsymbol{R}}_i{}^0\boldsymbol{R}_i^\mathrm{T}
+   
+   \\ \\
+   
+   _{(0)}\boldsymbol{\omega}_i=(_{(0)}\omega_{x_i},_{(0)}\omega_{y_i},_{(0)}\omega_{z_i})^\mathrm{T}
+   $$
+
+   - 方法2：
+     $$
+     _{(0)}\boldsymbol{\omega}_0  = _{(0)}\dot{\boldsymbol{\omega}}_0 = \boldsymbol{0}, _{(0)}\dot{\boldsymbol{r}}_0  = _{(0)}\ddot{\boldsymbol{r}}_0 = \boldsymbol{0}
+     $$
+
+     - 针对旋转关节
+       $$
+       \begin{aligned}
+       &_{(0)}\boldsymbol{\omega}_{i} =
+       _{(0)}\boldsymbol{\omega}_{i-1}
+       + 
+       \dot{q}_{i} {_{(0)}\boldsymbol{e}_{z}^{(i-1)}}, 
+       
+       \\ 
+       
+       &_{(0)}\dot{\boldsymbol{\omega}}_i =
+       _{(0)}\dot{\boldsymbol{\omega}}_{i-1}
+       +
+       \ddot{q}_{i} {_{(0)}\boldsymbol{e}_{z}^{(i-1)}}
+       +
+       \dot{q}_{i} {_{(0)}\boldsymbol{\omega}_{i-1}}
+       \times
+       _{(0)}\boldsymbol{e}_z^{(i-1)}, 
+       
+       \\
+       
+       & _{(0)}\boldsymbol{r}_{i} =
+       _{(0)}\boldsymbol{r}_{i-1}
+       +
+       _{(0)}\boldsymbol{r}_{i-1,i}, 
+       
+       \\
+       
+       &_{(0)}\dot{\boldsymbol{r}}_i =
+       _{(0)}\dot{\boldsymbol{r}}_{i-1}
+       +
+       _{(0)}\boldsymbol{\omega}_i
+       \times
+       _{(0)}\boldsymbol{r}_{i-1,i}, 
+       
+       \\
+       
+       &_{(0)}\ddot{\boldsymbol{r}}_i =
+       _{(0)}\ddot{\boldsymbol{r}}_{i-1}
+       +
+       _{(0)}\dot{\boldsymbol{\omega}}_i
+       \times
+       _{(0)}\boldsymbol{r}_{i-1,i}
+       +
+       _{(0)}\boldsymbol{\omega}_i
+       \times
+       \left(
+       _{(0)}\boldsymbol{\omega}_i
+       \times
+       _{(0)}\boldsymbol{r}_{i-1,i}
+       \right) 
+       
+       \end{aligned}
+       $$
+       
+
+     - 针对位移关节
+       $$
+       \begin{aligned}
+       &_{(0)}\boldsymbol{\omega}_{i} =_{(0)}\boldsymbol{\omega}_{i-1}, 
+       
+       \\
+       
+       &_{(0)}\dot{\boldsymbol{\omega}}_{i} =_{(0)}\dot{\boldsymbol{\omega}}_{i-1}, 
+       
+       \\
+       
+       &_{(0)}\boldsymbol{r}_{i} =_{(0)}\boldsymbol{r}_{i-1}+_{(0)}\boldsymbol{r}_{i-1,i}, 
+       
+       \\
+       
+       &_{(0)}\dot{\boldsymbol{r}}_{i} =_{(0)}\dot{\boldsymbol{r}}_{i-1}+_{(0)}\boldsymbol{\omega}_{i}\times_{(0)}\boldsymbol{r}_{i-1,i}+\dot{q}_{i } {_{(0)}}\boldsymbol{e}_{z}^{(i-1)} 
+       
+       \\
+       
+       &
+       \begin{aligned}
+       _{(0)}\ddot{\boldsymbol{r}}_{i} =
+       &_{(0)}\ddot{\boldsymbol{r}}_{i-1}
+       +
+       \ddot{q}_{i}{_{(0)}}\boldsymbol{e}_{z}^{(i-1)}
+       +
+       _{(0)}\boldsymbol{\omega}_{i}
+       \times
+       \left(
+       _{(0)}\boldsymbol{\omega}_{i}
+       \times
+       _{(0)}\boldsymbol{r}_{i-1,i}
+       \right)
+       + \\
+       &2 \dot{q}_{i }{_{(0)}}\boldsymbol{\omega}_{i}
+       \times
+       _{(0)}\boldsymbol{e}_{z}^{(i-1)}
+       +
+       _{(0)}\dot{\boldsymbol{\omega}}_{i}
+       \times
+       _{(0)}\boldsymbol{r}_{i-1,i}
+       \end{aligned}
+       
+       \end{aligned}
+       $$
+
+   
+
+4. 确认基于基底坐标系 $\text{(KS)}_0$ 各关节段的质量惯性张量 $_{(0)}\boldsymbol{J}_i^{S_i}$，并分析各关节段之间的动量角动量守恒
+
+   - 通过CAD获取各关节段在自身坐标系下的质量惯性张量
+     $$
+     \left._{\left(i\right)}\boldsymbol{J}_i^{\left(\mathcal{S}_i\right)}=\left(i\right)\left(\begin{array}{ccc}J_{xx_i}^{\left(\mathcal{S}_i\right)}&J_{xy_i}^{\left(\mathcal{S}_i\right)}&J_{xz_i}^{\left(\mathcal{S}_i\right)},\\J_{yx_i}^{\left(\mathcal{S}_i\right)}&J_{yy_i}^{\left(\mathcal{S}_i\right)}&J_{yz_i}^{\left(\mathcal{S}_i\right)},\\J_{zx_i}^{\left(\mathcal{S}_i\right)}&J_{zy_i}^{\left(\mathcal{S}_i\right)}&J_{zz_i}^{\left(\mathcal{S}_i\right)}.\end{array}\right.\right)=\mathrm{konst.}
+     $$
+
+   - 转换到基底坐标系下
+     $$
+     _{(0)}\boldsymbol{J}_{i}^{{(\mathcal{S}_{i})}}=\underbrace{{^{0}\boldsymbol{R}_{i\mathrm{~(}i)}\boldsymbol{J}_{i}^{{(\mathcal{S}_{i})\mathrm{~0}}}\boldsymbol{R}_{i}^{{\mathrm{T}}}}}_{{\text{Basiswechsel}}}
+     $$
+
+   - 列出各关节动量/角动量守恒
+
+     <img src="robot_arm_note.assets/image-20240619150230212.png" alt="image-20240619150230212" style="zoom:80%;" />
+     $$
+     \begin{aligned}
+     
+     &
+     \begin{aligned}
+     _{(0)}\boldsymbol{F}_{i}&=
+     m_{i} {_{(0)}}\ddot{\boldsymbol{r}}_{\mathrm{S}_{i}} 
+     \\
+     &=
+     _{(0)}\boldsymbol{F}_{i-1,i}
+     -
+     _{(0)}\boldsymbol{F}_{i,i+1}
+     +
+     m_{i}{_{(0)}}\boldsymbol{g}
+     
+     \end{aligned}
+     
+     \\ \\
+     
+     &
+     \begin{aligned}
+     _{(0)}\boldsymbol{M}_i^{(\mathrm{S}_i)}
+     &=
+     {}_{(0)}\boldsymbol{J}_i^{(\mathrm{S}_i)}{}_{(0)}\dot{\boldsymbol{\omega}}_i+
+     {}_{(0)}\boldsymbol{\omega}_i
+     \times
+     \left({}_{(0)}\boldsymbol{J}_i^{(\mathrm{S}_i)}{}_{(0)}\boldsymbol{\omega}_i\right)
+     \\&=
+     {}_{(0)}\boldsymbol{M}_{i-1,i}-
+     {}_{(0)}\boldsymbol{M}_{i,i+1}+{}_{(0)}\boldsymbol{r}_{i,\mathrm{S}_i}\times
+     {}_{(0)}\boldsymbol{F}_{i,i+1}-
+     {}_{(0)}\boldsymbol{r}_{i-1,\mathrm{S}_i}\times
+     {}_{(0)}\boldsymbol{F}_{i-1,i}
+     \end{aligned}
+     
+     \end{aligned}
+     $$
+     
+
+5. 从末端关节段向前递归计算驱动力/力矩
+
+   - 关节承受的力
+     $$
+     \begin{aligned}
+     &m_{n (0)}\ddot{\boldsymbol{r}}_{\mathrm{S}_{n}}={}_{(0)}\boldsymbol{F}_{n-1,n}-\overbrace{{_{(0)}}\boldsymbol{F}_{n,n+1}}^{\text{externe Kraft}}+m_{n }{_{(0)}}\boldsymbol{g} \\ 
+     &\Rightarrow 
+     _{(0)}\boldsymbol{F}_{n-1,n}=m_{n (0)}\ddot{\boldsymbol{r}}_{\mathrm{S}_n}+_{(0)}\boldsymbol{F}_{n,n+1}-m_{n }{_{(0)}}\boldsymbol{g}, 
+     
+     \\ \\
+     
+     &m_{n-1 (0)}\ddot{\boldsymbol{r}}_{\mathrm{S}_{n-1}}=_{(0)}\boldsymbol{F}_{n-2,n-1}-_{(0)}\boldsymbol{F}_{n-1,n}+m_{n-1}{_{(0)}}\boldsymbol{g} \\
+     &\Rightarrow
+     _{(0)}\boldsymbol{F}_{n-2,n-1}=m_{n-1 (0)}\ddot{\boldsymbol{r}}_{\mathrm{S}_{n-1}}+_{(0)}\boldsymbol{F}_{n-1,n}-m_{n-1}{_{(0)}}\boldsymbol{g}, 
+     
+     \\ \\
+     &m_{n-2}{_{(0)}}\ddot{\boldsymbol{r}}_{\mathrm{S}_{n-2}}={}_{(0)}\boldsymbol{F}_{n-3,n-2}-{}_{(0)}\boldsymbol{F}_{n-2,n-1}+m_{n-2 (0)}\boldsymbol{g} \\
+     &\Rightarrow
+     _{(0)}\boldsymbol{F}_{n-3,n-2}=\ldots,
+     \end{aligned}
+     $$
+     
+
+   - 关节承受的力矩
+     $$
+     \begin{aligned}
+     &{_{(0)}}\boldsymbol{J}_{n}^{(\text{S}_n)} 
+     {_{(0)}}\dot{\boldsymbol{\omega}}_{n} +
+     {_{(0)}}\boldsymbol{\omega}_{n} \times
+     \left(
+     {_{(0)}}\boldsymbol{J}_{n}^{(\text{S}_n)} 
+     {_{(0)}}\boldsymbol{\omega}_{n}
+     \right)
+     
+     \\ &= 
+     {_{(0)}}\boldsymbol{M}_{n-1, n} - 
+     \underbrace{{_{(0)}}\boldsymbol{M}_{n, n+1}}_{\text{extern Moment}} +
+     {_{(0)}}\boldsymbol{r}_{n, \text{S}_n} \times
+     \underbrace{{_{(0)}}\boldsymbol{F}_{n, n+1}}_{\text{extern Force}} -
+     {_{(0)}}\boldsymbol{r}_{n-1, \text{S}_n} \times
+     {_{(0)}}\boldsymbol{F}_{n-1, n}
+     \\ &\Rightarrow 
+     {_{(0)}}\boldsymbol{M}_{n-1, n} = \cdots
+     
+     \\ \\
+     
+     &{_{(0)}}\boldsymbol{J}_{n-1}^{(\text{S}_{n-1})} 
+     {_{(0)}}\dot{\boldsymbol{\omega}}_{n-1} +
+     {_{(0)}}\boldsymbol{\omega}_{n-1} \times
+     \left(
+     {_{(0)}}\boldsymbol{J}_{n-1}^{(\text{S}_{n-1})} 
+     {_{(0)}}\boldsymbol{\omega}_{n-1}
+     \right)
+     
+     \\ &= 
+     {_{(0)}}\boldsymbol{M}_{n-2, n-1} - 
+     {{_{(0)}}\boldsymbol{M}_{n-1, n}} +
+     {_{(0)}}\boldsymbol{r}_{n-1, \text{S}_{n-1}} \times
+     {{_{(0)}}\boldsymbol{F}_{n-1, n}} -
+     {_{(0)}}\boldsymbol{r}_{n-2, \text{S}_{n-1}} \times
+     {_{(0)}}\boldsymbol{F}_{n-2, n-1}
+     \\ &\Rightarrow 
+     {_{(0)}}\boldsymbol{M}_{n-2, n-1} = \cdots
+     
+     \end{aligned}
+     $$
+
+   - 关节驱动力（位移关节）
+     $$
+     \tau_i = _{(0)}\boldsymbol{M}_{i-1, i}^{\text{T}} {_{(0)}}\boldsymbol{e}_z^{i-1}
+     $$
+     
+
+   - 关节驱动力矩（旋转关节）
+     $$
+     \tau_i = {_{(0)}}\boldsymbol{F}_{i-1, i}^{\text{T}}{_{(0)}}\boldsymbol{e}_z^{(i-1)}
+     $$
+     
+
+   
+
+6. 整理成矩阵形式
+   $$
+   \boldsymbol{\tau}=\boldsymbol{M}(q)\ddot{\boldsymbol{q}}+\boldsymbol{c}(\boldsymbol{q},\dot{\boldsymbol{q}})+\boldsymbol{g}(\boldsymbol{q})+\boldsymbol{h}(\boldsymbol{q},\dot{\boldsymbol{q}})
+   $$
+   
+
+
+
+##### 拉格朗日法
+
+1. 分离机械臂各关节，确认各关节段的重心 $S_i$ 
+
+2. 确认基于基底坐标系 $\text{(KS)}_0$ 的重心位移向量 $_{(0)}\boldsymbol{r}_{S_i}$、重心位移速度 $_{(0)}\boldsymbol{\dot{r}}_{S_i}$ 以及重心位移加速度 $_{(0)}\boldsymbol{\ddot{r}}_{S_i}$
+
+3. 确认基于基底坐标系 $\text{(KS)}_0$ 各关节段的的角速度 $_{(0)}\omega_i$ 以及角加速度 $_{(0)}\dot{\omega}_i$
+
+4. 确认基于基底坐标系 $\text{(KS)}_0$ 各关节段的质量惯性张量 $_{(0)}\boldsymbol{J}_i^{S_i}$，并分析各关节段之间的动量角动量守恒
+
+   （1-4步与牛顿欧拉法相同）
+
+5. 计算势能 $U$ 与动能 $T$
+   $$
+   \begin{aligned}
+   T &= \frac{1}{2}\sum_{i=1}^{n}
+   \left(
+   m_i
+   \underbrace{
+   {_{(0)}}\dot{\boldsymbol{r}}_{\text{S}_i}^{\text{T}}
+   {_{(0)}}\dot{\boldsymbol{r}}_{\text{S}_i}
+   }_{\text{Translation energy}}
+   
+   +
+   
+   \underbrace{
+   {_{(0)}}\boldsymbol{\omega}_i^{\text{T}}
+   {_{(0)}}\boldsymbol{J}_i^{\text{S}_i}
+   {_{(0)}}\boldsymbol{\omega}_i
+   }_{\text{Rotation energy}}
+   
+   \right)
+   
+   \\ \\
+   
+   U &=
+   -\sum_{i=1}^n
+   \left(
+   m_i
+   {_{(0)}}\boldsymbol{g}^{\text{T}}
+   {_{(0)}}\boldsymbol{r}_{\text{S}_i}
+   \right)
+   
+   \end{aligned}
+   $$
+   
+
+6. 运用拉格朗日公式第二形式
+   $$
+   \begin{aligned}
+   L &= T - U
+   
+   \\ \\
+   \boldsymbol{\tau} &=
+   \frac{\text{d}}{\text{d}t}
+   \frac{\part L}{\part \dot{\boldsymbol{q}}} - 
+   \frac{\part L}{\part {\boldsymbol{q}}} 
+   
+   \end{aligned}
+   $$
+   
+
+7. 整理成矩阵形式
+   $$
+   \boldsymbol{\tau}=\boldsymbol{M}(q)\ddot{\boldsymbol{q}}+\boldsymbol{c}(\boldsymbol{q},\dot{\boldsymbol{q}})+\boldsymbol{g}(\boldsymbol{q})+\boldsymbol{h}(\boldsymbol{q},\dot{\boldsymbol{q}})
+   $$
+   
+
+8. 考虑末端力与力矩（通过雅克比矩阵）
+   $$
+   \boldsymbol{\tau}_\text{extern}(\boldsymbol{q}) = \boldsymbol{J}^{\text{T}}(\boldsymbol{q})\boldsymbol{\mathcal{F}}
+   
+   \\ \\
+   
+   \boldsymbol{\tau}=\boldsymbol{M}(q)\ddot{\boldsymbol{q}}+\boldsymbol{c}(\boldsymbol{q},\dot{\boldsymbol{q}})+\boldsymbol{g}(\boldsymbol{q}) - \boldsymbol{\tau}_\text{extern}(\boldsymbol{q})
+   $$
+
+
+
+
+
+##### 考虑电机减速比与摩擦力
+
+- 摩擦力模型
+  $$
+  \boldsymbol{h}(\boldsymbol{q},\dot{\boldsymbol{q}})=
+  \operatorname{diag}(\operatorname{sign}(\dot{\boldsymbol{q}}))\boldsymbol{r}_\mathrm{c}+\operatorname{diag}(\dot{\boldsymbol{q}})\boldsymbol{r}_\mathrm{v},
+  $$
+  ![image-20240619170723516](robot_arm_note.assets/image-20240619170723516.png)
+
+- 电机力矩（考虑输出力矩以及转速和电机转矩）
+  $$
+  \tau_{\mathrm{M}_i}=\frac{1}{u_{\mathrm{G}_i}} \tau_i+_{(\mathrm{A}_i)}J_{zz_{\mathrm{A}_i}} \ddot{q}_{\mathrm{M}_i}
+  
+  \\ \\
+  
+  \tau_{\mathrm{M}_i}=\frac1{u_{\mathrm{G}_i}} \tau_i+u_{\mathrm{G}_i (\mathrm{A}_i)}J_{zz_{\mathrm{A}_i}} \ddot{q}_i.
+  $$
+
+  - 电机传动比 $u_{\text{G}_i}$
+
+  - 电机转动惯量 $_{(\mathrm{A}_i)}J_{zz_{\mathrm{A}_i}}$
+
+  - 电机转速 $\ddot{q}_{\text{M}_i}$
+
+  - 电机输出转速 $\ddot{q}_i$
+
+  - 电机力矩 $\tau_{\text{M}_i}$
+
+  - 电机输出力矩 $\tau_i$
+
+    <img src="robot_arm_note.assets/image-20240619171621371.png" alt="image-20240619171621371" style="zoom: 67%;" />
+
+- 电机层的逆动力学模型
+  $$
+  \begin{aligned}
+  \boldsymbol{\tau}_{\mathrm{M}}
+  & =
+  \mathrm{diag}\left(
+  \frac{1}{u_{\mathrm{G}_1}}, 
+  \ldots, 
+  \frac{1}{u_{\mathrm{G}_n}}
+  \right) 
+  \left(
+  \boldsymbol{M}(\boldsymbol{q}) \ddot{\boldsymbol{q}}+
+  \boldsymbol{c}(\boldsymbol{q},\dot{\boldsymbol{q}})+
+  \boldsymbol{g}(\boldsymbol{q})\right)
+  \\
+  &+
+  \operatorname{diag}(\operatorname{sign}(\dot{\boldsymbol{q}}))\boldsymbol{r}_\mathrm{c}+\operatorname{diag}(\dot{\boldsymbol{q}})\boldsymbol{r}_\mathrm{v},
+  \\ 
+  &+
+  \mathrm{diag}\left(
+  u_{\text{G}_1}
+  {_{(\text{A}_1)}}J_{{\text{zz}, \text{A}_1}}, 
+  \cdots,
+  u_{\text{G}_n}
+  {_{(\text{A}_n)}}J_{{\text{zz}, \text{A}_n}}
+  \right)
+  \ddot{\boldsymbol{q}}
+  
+  \end{aligned}
+  $$
+  
