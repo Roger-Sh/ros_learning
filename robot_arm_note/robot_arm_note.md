@@ -1,12 +1,4 @@
-# 机械臂理论介绍
-
-- 机械臂类型
-- 机械臂坐标系表达与转换
-- 机械臂运动学
-- 机械臂动力学
-- 机械臂运动规划
-- 机械臂运动控制
-- 机械臂视觉应用
+# 机械臂笔记
 
 ## 串联机械臂理论简介
 
@@ -1456,7 +1448,6 @@ $$
        \end{aligned}
        $$
        
-
      - 针对位移关节
        $$
        \begin{aligned}
@@ -1502,9 +1493,9 @@ $$
        
        \end{aligned}
        $$
-
    
-
+   
+   
 4. 确认基于基底坐标系 $\text{(KS)}_0$ 各关节段的质量惯性张量 $_{(0)}\boldsymbol{J}_i^{S_i}$，并分析各关节段之间的动量角动量守恒
 
    - 通过CAD获取各关节段在自身坐标系下的质量惯性张量
@@ -1581,8 +1572,7 @@ $$
      \end{aligned}
      $$
      
-
-   - 关节承受的力矩
+- 关节承受的力矩
      $$
      \begin{aligned}
      &{_{(0)}}\boldsymbol{J}_{n}^{(\text{S}_n)} 
@@ -1625,20 +1615,19 @@ $$
      
      \end{aligned}
      $$
-
-   - 关节驱动力（位移关节）
+   
+- 关节驱动力（位移关节）
      $$
      \tau_i = _{(0)}\boldsymbol{M}_{i-1, i}^{\text{T}} {_{(0)}}\boldsymbol{e}_z^{i-1}
      $$
      
-
    - 关节驱动力矩（旋转关节）
-     $$
+  $$
      \tau_i = {_{(0)}}\boldsymbol{F}_{i-1, i}^{\text{T}}{_{(0)}}\boldsymbol{e}_z^{(i-1)}
-     $$
-     
-
+  $$
+  
    
+  
 
 6. 整理成矩阵形式
    $$
@@ -1694,7 +1683,6 @@ $$
    \end{aligned}
    $$
    
-
 6. 运用拉格朗日公式第二形式
    $$
    \begin{aligned}
@@ -1709,13 +1697,11 @@ $$
    \end{aligned}
    $$
    
-
 7. 整理成矩阵形式
    $$
    \boldsymbol{\tau}=\boldsymbol{M}(q)\ddot{\boldsymbol{q}}+\boldsymbol{c}(\boldsymbol{q},\dot{\boldsymbol{q}})+\boldsymbol{g}(\boldsymbol{q})+\boldsymbol{h}(\boldsymbol{q},\dot{\boldsymbol{q}})
    $$
    
-
 8. 考虑末端力与力矩（通过雅克比矩阵）
    $$
    \boldsymbol{\tau}_\text{extern}(\boldsymbol{q}) = \boldsymbol{J}^{\text{T}}(\boldsymbol{q})\boldsymbol{\mathcal{F}}
@@ -1791,4 +1777,9 @@ $$
   
   \end{aligned}
   $$
-  
+
+
+
+
+
+### 机械臂视觉应用

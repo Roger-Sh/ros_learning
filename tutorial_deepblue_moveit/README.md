@@ -20,7 +20,7 @@ ROS Melodic
 
 
 
-## 笔记
+## Moveit 笔记
 
 ### CH1 - CH2
 

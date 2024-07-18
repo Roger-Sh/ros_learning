@@ -265,7 +265,7 @@ catkin_make
 
 
 
-## Note
+## Aubo Note
 
 ### 梳理 moveit -> aubo_driver 的数据链路
 
