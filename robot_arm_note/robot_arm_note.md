@@ -1717,14 +1717,95 @@ $$
 
 ##### 考虑电机减速比与摩擦力
 
+<img src="robot_arm_note.assets/image-20240619171621371.png" alt="image-20240619171621371" style="zoom: 67%;" />
+
+- 电机传动模型+机械臂动力学模型
+  $$
+  \begin{align}
+  
+  \tau_{\text{M}_i} &= \frac{1}{u_{\text{G}_i}} \tau_i
+  
+  \\ \\
+  
+  \boldsymbol{\tau}_{\text{M}} &= \text{diag}\left( \frac{1}{u_{\text{G}_1}}, \cdots, \frac{1}{u_{\text{G}_n}} \tau_i \right) \boldsymbol{\tau} 
+  
+  \\
+  
+  &= 
+  \text{diag}\left( \frac{1}{u_{\text{G}_1}}, \cdots, \frac{1}{u_{\text{G}_n}} \tau_i \right)
+  
+  \boldsymbol{M}(q)\ddot{\boldsymbol{q}}+\boldsymbol{c}(\boldsymbol{q},\dot{\boldsymbol{q}})+\boldsymbol{g}(\boldsymbol{q})
+  
+  \end{align}
+  $$
+  
+
+
+
+
+
 - 摩擦力模型
+  
+  - 静摩擦 static Friction
+  
+    - 当物体处于静止状态时，存在平行于物体表面的静摩擦力 $F_s$，并且力的极限为 $\pm\mu_s mg$，其中正负号表示力的方向，$\mu_s$为静摩擦系数， $0 < \mu_s < 1$。
+    - 静摩擦力可以取到其极限之间的任何值, 以保持质量静止
+    - 如果要让物体摆脱静止状态，开始运动，必须有一个力来克服静摩擦引起的运动阻力。
+    - 此时物体与另一个物体表面间只具有相对滑动趋势，而未发生相对滑动。
+  
+  - 库伦摩擦力 Coulomb Friction
+  
+    - 保持不变
+  
+    - 滑动摩擦属于库伦摩擦
+  
+    - 由库仑摩擦引起的阻力 $F_c$ 具有恒定大小, $\mu_k$ 为动摩擦系数
+      $$
+      \begin{align}
+      F_c = -\mu_k mg, \text{for}\ v < 0
+      \\ \\
+      F_c = \mu_k mg, \text{for}\ v > 0
+      \end{align}
+      $$
+      
+  
+  - 粘性摩擦 Viscous Friction
+  
+    - 当质量在粘性介质如空气或润滑剂中移动时，由于介质的粘性会产生额外的摩擦力。（对于简单的摩擦模型一般不予考虑）
+    - 粘性摩擦力通常会表达为关于速度的非线性函数 $F_v = h(v)$
+    - 运动速度比较小时可以近似看做是与速度成正比 $F_v = cv$
+  
+  - 静摩擦 + 库伦摩擦 + 粘性摩擦
+  
   $$
   \boldsymbol{h}(\boldsymbol{q},\dot{\boldsymbol{q}})=
-  \operatorname{diag}(\operatorname{sign}(\dot{\boldsymbol{q}}))\boldsymbol{r}_\mathrm{c}+\operatorname{diag}(\dot{\boldsymbol{q}})\boldsymbol{r}_\mathrm{v},
+  \operatorname{diag}(\operatorname{sign}(\dot{\boldsymbol{q}}))\boldsymbol{r}_\mathrm{c}+\operatorname{diag}(\dot{\boldsymbol{q}})\boldsymbol{r}_\mathrm{v}
   $$
   ![image-20240619170723516](robot_arm_note.assets/image-20240619170723516.png)
-
+  
+  - 考虑粘性摩擦的斯特里贝克效应
+  
+    - 粘性摩擦斯特里贝克效应是一种物理现象,发生在两个接触面表面之间存在粘性摩擦力的情况下。具体表现为:
+      1. 当两个接触面保持静止状态时,存在较大的粘性摩擦力,阻碍它们相对滑动。
+      2. 当外力将接触面慢慢拉开时,粘性摩擦力会逐渐降低。
+      3. 一旦接触面突然断开,粘性摩擦力会骤然降低到很小的动摩擦力。这就形成了一种"粘拉脱"的效应,也就是斯特里贝克效应。
+  
+    ![img](./robot_arm_note.assets/v2-517ec70c96907cda352fa3712bdb5215_720w.webp)
+  
+  - 考虑摩擦力之后的机械臂动力学, 简化了传动对摩擦的影响, 这里的非线性关系主要来自于速度 $\dot{\boldsymbol{q}}$ 相关的摩擦力
+    $$
+    \boldsymbol{\tau}_{\text{M}} = 
+    \text{diag}\left( \frac{1}{u_{\text{G}_1}}, \cdots, \frac{1}{u_{\text{G}_n}} \tau_i \right)
+    
+    \boldsymbol{M}(q)\ddot{\boldsymbol{q}}+\boldsymbol{c}(\boldsymbol{q},\dot{\boldsymbol{q}})+\boldsymbol{g}(\boldsymbol{q})
+    
+    + \boldsymbol{h}(\boldsymbol{q}, \dot{\boldsymbol{q}})
+    $$
+    
+  
 - 电机力矩（考虑输出力矩以及转速和电机转矩）
+
+  <img src="robot_arm_note.assets/image-20240619171621371.png" alt="image-20240619171621371" style="zoom: 67%;" />
   $$
   \tau_{\mathrm{M}_i}=\frac{1}{u_{\mathrm{G}_i}} \tau_i+_{(\mathrm{A}_i)}J_{zz_{\mathrm{A}_i}} \ddot{q}_{\mathrm{M}_i}
   
@@ -1745,7 +1826,7 @@ $$
 
   - 电机输出力矩 $\tau_i$
 
-    <img src="robot_arm_note.assets/image-20240619171621371.png" alt="image-20240619171621371" style="zoom: 67%;" />
+    
 
 - 电机层的逆动力学模型
   $$
@@ -1761,9 +1842,8 @@ $$
   \boldsymbol{M}(\boldsymbol{q}) \ddot{\boldsymbol{q}}+
   \boldsymbol{c}(\boldsymbol{q},\dot{\boldsymbol{q}})+
   \boldsymbol{g}(\boldsymbol{q})\right)
-  \\
-  &+
-  \operatorname{diag}(\operatorname{sign}(\dot{\boldsymbol{q}}))\boldsymbol{r}_\mathrm{c}+\operatorname{diag}(\dot{\boldsymbol{q}})\boldsymbol{r}_\mathrm{v},
+  +
+  \boldsymbol{h}(\boldsymbol{q}, \dot{\boldsymbol{q}})
   \\ 
   &+
   \mathrm{diag}\left(
@@ -1782,4 +1862,12 @@ $$
 
 
 
-### 机械臂视觉应用
+### 机械臂自动控制
+
+
+
+### 机械臂视觉
+
+相机模型
+
+手眼标定
